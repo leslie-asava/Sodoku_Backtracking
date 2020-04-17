@@ -2,7 +2,10 @@ import numpy as np
 import pygame
 import time
 import os
+import visualize
+import random
 pygame.init()
+pygame.display.init
 #Original
 grid = [[5,3,0,0,7,0,0,0,0],
         [6,0,0,1,9,5,0,0,0],
@@ -73,7 +76,7 @@ color_values = []
 
 pygame.draw.rect(screen,(0,0,0),(cell_start_x+48,cell_start_y-4,474,475))
 pygame.draw.rect(screen,BACKGROUND_COLOR,(30,cell_start_y+20,220,120))
-title = title_font.render("Sodoku [BOT]", True, (0,0,0), BACKGROUND_COLOR)
+title = title_font.render("Sudoku [BOT]", True, (0,0,0), BACKGROUND_COLOR)
 algorthm = stats_font.render("ALGORITHM :  Backtracking", True, (255,255,255), BACKGROUND_COLOR)
 start_time = stats_font.render("START TIME  :  "+time.strftime("%H:%M:%S"), True, (255,255,255),BACKGROUND_COLOR)
 status = stats_font.render("STATUS          :  Solving", True, (255,255,255),BACKGROUND_COLOR)
@@ -98,9 +101,20 @@ for row in range(9):
     cell_y += square_length + spacing
         
 cells = [pygame.draw.rect(screen,color_values[i],cell_coordinates[i]) for i in range(81)]
+display_grid = []
+for y in grid:
+    for x in y:
+        display_grid.append(x)
+
+values = [font.render(str(display_grid[i]), True, (0,0,0), color_values[i] ) for i in range(81)]
+for i in range(81):
+    screen.blit(values[i],font_coordinates[i])
+
+pygame.display.flip()
 
 def solve():
     global grid
+    global cell_coordinates
     solved = []
     done = False
 
@@ -111,18 +125,21 @@ def solve():
 
     values = [font.render(str(display_grid[i]), True, (0,0,0), color_values[i] ) for i in range(81)]
     
+    interval = -1
     for y in range(9):
         for x in range(9):
+            interval+=1
+            if grid[y][x] != 0:
+                screen.blit(values[interval],font_coordinates[interval])
             if grid[y][x] == 0:
                 for n in range (1,10):
                     if possible(y,x,n):
                         grid[y][x] = n
+                        if random.choice([0,0,0,0,1]):
+                            pygame.display.update(cell_coordinates[interval])
                         solve()
                         grid[y][x] = 0
                 return
-        for i in range(81):
-            screen.blit(values[i],font_coordinates[i])
-        pygame.display.flip()
     for y in grid:
         for x in y:
             solved.append(x)
@@ -133,29 +150,35 @@ def solve():
         for row in solved:
             for number in row:
                 file.write(str(number))
-    return
+    try:
+        pygame.display.quit()
+    except:
+        return
+
 
 running = True
+
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    solve()
-    running = False
+    try:
+        solve()
+    except:
+        running = False
 
-file = open("solution.txt","r")
-file = file.read()
-grid = []
-for each in file:
-    grid.append(int(each))
+running = True
+pygame.init()
+pygame.display.init()
 
-os.system("python visualize.py")
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    visualize.main()
+
+with open("solution.txt","w") as file:
+    file.write("")
+    
 quit()
-
-    
-
-
-
-    
-
